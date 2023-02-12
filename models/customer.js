@@ -1,5 +1,6 @@
 /** Customer for Lunchly */
 
+const { d } = require("nunjucks/src/filters");
 const db = require("../db");
 const Reservation = require("./reservation");
 
@@ -81,6 +82,33 @@ class Customer {
       );
     }
   }
+  //part 7, search result
+  static async search(searchResult){
+    const result = await db.query( `SELECT id, 
+    first_name AS "firstName",  
+    last_name AS "lastName", 
+    phone, 
+    notes
+  FROM customers
+  WHERE id = $1, firstName = $2, lastName = $3
+  ORDER BY last_name, first_name
+  `, [searchResult]);
+
+  return result.rows.map(r => new Customer(r));
+
+  }
+  //part 8, added bestCustomers, top 10 order by reservations
+  static async getBestCustomers(){
+    const result = await db.query(`
+    SELECT c.first_name, c.last_name, COUNT(r.customer_id)
+    AS total_reservations FROM customers c JOIN reservations r ON
+    c.id = r.customer_id 
+    GROUP BY c.first_name, c.last_name
+    ORDER BY COUNT(r.customer_id) DESC LIMIT 10`);
+
+    return result.rows;
+  }
+
 }
 
 module.exports = Customer;

@@ -61,6 +61,14 @@ router.get("/:id/", async function(req, res, next) {
 });
 
 //part 8, routes to add the best customers
+router.get('/best-customers', async (req, res,next) => {
+  try{
+    const bestCustomers = await Customer.getBestCustomers();
+    return res.sender('customer_list.html',  {bestCustomers} );
+  } catch(e){
+    return next(e)
+  }
+})
 
 /** Show form to edit a customer. */
 
@@ -113,5 +121,16 @@ router.post("/:id/add-reservation/", async function(req, res, next) {
     return next(err);
   }
 });
+
+//part 7, added search functionality
+router.post('/search', async (req, res, next) => {
+  try{
+    let searchResult = req.body.searchResult;
+    let customers = await Customer.search(searchResult);
+    return res.sender('customer_list.html',  {customers} );
+  } catch(e){
+    return next(e)
+  }
+})
 
 module.exports = router;
